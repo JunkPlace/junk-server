@@ -1,5 +1,6 @@
 module.exports = config;
 
+const uuid = require('uuid');
 var counter = 0;
 
 function config(socketEngine) {
@@ -39,17 +40,21 @@ function onConnect(socket) {
 
   socket.number = ++counter;
 
-  socket.on('info', function (data, ack) {
+  socket.on('post', function (data, ack) {
 
-    console.info('info:', 'id:', socket.id, 'data:', JSON.stringify(data));
+    console.info('post', 'socket:', socket.id, 'data:', JSON.stringify(data));
 
-    socket.broadcast.emit('message', {
-      from: socket.number,
-      text: data
-    });
+    var message = {
+      id: uuid.v4(),
+      from: '#' + socket.number,
+      text: data,
+      date: new Date()
+    };
+
+    socket.broadcast.emit('message', message);
 
     if (typeof ack === 'function') {
-      ack('Hi there!');
+      ack(message);
     }
 
   });
