@@ -3,6 +3,8 @@ module.exports = {
   save: save
 };
 
+const uuid = require('uuid');
+
 const store = [];
 
 function findAll() {
@@ -10,6 +12,11 @@ function findAll() {
 }
 
 function save(message) {
+
+  Object.assign(message, {
+    id: uuid.v4(),
+    date: new Date()
+  });
 
   store.splice(0, 0, message);
 

@@ -1,6 +1,5 @@
 module.exports = config;
 
-const uuid = require('uuid');
 const messages = require('../models/messages');
 
 var counter = 0;
@@ -37,23 +36,19 @@ function onDisconnect(socket) {
 
 function onConnect(socket) {
 
-  console.info(
-    'CONNECTED',
-    'id:', socket.id,
-    'address:', ip(socket)
-  );
+  console.info('CONNECTED', 'id:', socket.id, 'address:', ip(socket));
 
   socket.number = ++counter;
+  socket.on('post', onPost);
+  socket.emit('welcome', messages.findAll());
 
-  socket.on('post', function (text, ack) {
+  function onPost(text, ack) {
 
     console.info('post', 'socket:', socket.id, 'data:', JSON.stringify(text));
 
     var message = messages.save({
-      id: uuid.v4(),
       from: '#' + socket.number,
-      text: text,
-      date: new Date()
+      text: text
     });
 
     socket.broadcast.emit('message', message);
@@ -62,8 +57,7 @@ function onConnect(socket) {
       ack(message);
     }
 
-  });
-
-  socket.emit('welcome', messages.findAll());
+  }
 
 }
+
