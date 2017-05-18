@@ -5,6 +5,10 @@ const messages = require('../models/messages');
 
 var counter = 0;
 
+function ip(socket) {
+  return socket.handshake.headers['x-real-ip'] || socket.handshake.address;
+}
+
 function config(socketEngine) {
 
   socketEngine.on('connection', function (socket) {
@@ -26,7 +30,7 @@ function onDisconnect(socket) {
   console.info(
     'DISCONNECTED',
     'id:', socket.id,
-    'address:', socket.handshake.address
+    'address:', ip(socket)
   );
 
 }
@@ -36,7 +40,7 @@ function onConnect(socket) {
   console.info(
     'CONNECTED',
     'id:', socket.id,
-    'address:', socket.handshake.address
+    'address:', ip(socket)
   );
 
   socket.number = ++counter;
