@@ -1,6 +1,8 @@
 module.exports = config;
 
 const uuid = require('uuid');
+const messages = require('../models/messages');
+
 var counter = 0;
 
 function config(socketEngine) {
@@ -29,7 +31,6 @@ function onDisconnect(socket) {
 
 }
 
-
 function onConnect(socket) {
 
   console.info(
@@ -40,16 +41,16 @@ function onConnect(socket) {
 
   socket.number = ++counter;
 
-  socket.on('post', function (data, ack) {
+  socket.on('post', function (text, ack) {
 
-    console.info('post', 'socket:', socket.id, 'data:', JSON.stringify(data));
+    console.info('post', 'socket:', socket.id, 'data:', JSON.stringify(text));
 
-    var message = {
+    var message = messages.save({
       id: uuid.v4(),
       from: '#' + socket.number,
-      text: data,
+      text: text,
       date: new Date()
-    };
+    });
 
     socket.broadcast.emit('message', message);
 
@@ -58,5 +59,7 @@ function onConnect(socket) {
     }
 
   });
+
+  socket.emit('welcome', messages.findAll());
 
 }
