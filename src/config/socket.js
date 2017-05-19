@@ -1,5 +1,6 @@
 module.exports = config;
 
+const debug = require('debug')('junk:server:socket');
 const messages = require('../models/messages');
 
 var counter = 0;
@@ -25,28 +26,28 @@ function config(socketEngine) {
 }
 
 function onDisconnect(socket) {
-
-  console.info(
-    'DISCONNECTED',
-    'id:', socket.id,
-    'address:', ip(socket)
-  );
-
+  debug('DISCONNECTED', 'id:', socket.id, 'address:', ip(socket));
 }
 
 function onConnect(socket) {
 
-  console.info('CONNECTED', 'id:', socket.id, 'address:', ip(socket));
+  debug('CONNECTED', 'id:', socket.id, 'address:', ip(socket));
 
   socket.number = ++counter;
   socket.on('post', onPost);
-  socket.emit('welcome', messages.findAll());
+  socket.on('setUser', onSetUser);
+
+  messages.findAll()
+    .then(function (lastMessages)  {
+      socket.emit('welcome', lastMessages)
+    });
 
   function onPost(text, ack) {
 
-    console.info('post', 'socket:', socket.id, 'data:', JSON.stringify(text));
+    debug('post', 'socket:', socket.id, 'data:', JSON.stringify(text));
 
     var message = messages.save({
+      authorId: socket.userId,
       from: '#' + socket.number,
       text: text
     });
@@ -57,6 +58,11 @@ function onConnect(socket) {
       ack(message);
     }
 
+  }
+
+  function onSetUser(userId) {
+    debug('setUser', userId);
+    socket.userId = userId;
   }
 
 }
