@@ -40,7 +40,11 @@ function onConnect(socket) {
 
   socket.number = ++counter;
   socket.on('post', onPost);
-  socket.emit('welcome', messages.findAll());
+
+  messages.findAll()
+    .then(function (lastMessages)  {
+      socket.emit('welcome', lastMessages)
+    });
 
   function onPost(text, ack) {
 

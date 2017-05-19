@@ -1,6 +1,9 @@
 const app = require('./config/express');
 const debug = require('debug')('junk:server');
 const http = require('http');
+const redis = require('./config/redis');
+
+redis.setup();
 
 /**
  * Get port from environment and store in Express.
